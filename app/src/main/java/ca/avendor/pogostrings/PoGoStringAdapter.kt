@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.stringitem.view.*
@@ -30,23 +31,21 @@ class PoGoStringAdapter(
 
     override fun onBindViewHolder(holder: PoGoStringViewHolder, position: Int) {
 
-        val curStringItem = strings[position]
-        Log.d("tag", curStringItem.toString())
-        /*holder.username.text = curStringItem.tvStringItem
-        holder.app.text = curStringItem.app
-        holder.password.text = curStringItem.password
+        val poGoString: PoGoString = strings[position]
+        
 
-        holder.copy.setOnClickListener() {
+        holder.itemView.btnCopyToClipboard.setOnClickListener(){
+            Log.d("tag", poGoString.item)
             val clipboardManager =
                 holder.itemView.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clipData = ClipData.newPlainText("text", "1234567890")
+            val clipData = ClipData.newPlainText("text", poGoString.item)
             clipboardManager.setPrimaryClip(clipData)
             Toast.makeText(holder.itemView.context, "Text copied to clipboard", Toast.LENGTH_LONG)
                 .show()
+
         }
-*/
         holder.itemView.apply {
-            tvStringItem.text =curStringItem.string
+            tvStringItem.text =poGoString.item
 
         }
     }
