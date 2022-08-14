@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.stringitem.view.*
 
 class PoGoStringAdapter(
-    private val strings: MutableList<PoGoString>
+    private val stringsList: ArrayList<PoGoString>
 ) : RecyclerView.Adapter<PoGoStringAdapter.PoGoStringViewHolder>(){
 
     class PoGoStringViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -29,7 +29,7 @@ class PoGoStringAdapter(
 
     override fun onBindViewHolder(holder: PoGoStringViewHolder, position: Int) {
 
-        val poGoString: PoGoString = strings[position]
+        val poGoString: PoGoString = stringsList[position]
         
 
         holder.itemView.btnCopyToClipboard.setOnClickListener(){
@@ -54,18 +54,19 @@ class PoGoStringAdapter(
         }*/
 
         holder.itemView.apply {
-            tvStringItem.text =poGoString.item
+
+            tvStringItem.text = stringsList.get(position).item
 
         }
     }
 
     override fun getItemCount(): Int {
-        return strings.size
+        return stringsList.size
     }
 
     fun addPogoString(stringItem: PoGoString) {
-        strings.add(stringItem)
-        notifyItemInserted(strings.size - 1)
+        stringsList.add(stringItem)
+        //notifyItemInserted(strings.size - 1)
 
     }
 }
