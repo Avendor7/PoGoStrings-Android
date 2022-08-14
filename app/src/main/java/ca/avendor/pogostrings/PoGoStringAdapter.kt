@@ -66,6 +66,7 @@ class PoGoStringAdapter(
 
     fun addPogoString(stringItem: PoGoString) {
         stringsList.add(stringItem)
+
         //notifyItemInserted(strings.size - 1)
 
     }
