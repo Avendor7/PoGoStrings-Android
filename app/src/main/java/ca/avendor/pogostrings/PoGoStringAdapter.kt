@@ -44,6 +44,17 @@ class PoGoStringAdapter(
                 .show()
 
         }
+        /*holder.itemView.setOnLongClickListener() {
+            Log.d("tag", poGoString.item)
+            val clipboardManager =
+                holder.itemView.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipData = ClipData.newPlainText("text", poGoString.item)
+            clipboardManager.setPrimaryClip(clipData)
+            Toast.makeText(holder.itemView.context, "Text copied to clipboard", Toast.LENGTH_LONG)
+                .show()
+            false
+        }*/
+
         holder.itemView.apply {
             tvStringItem.text =poGoString.item
 
