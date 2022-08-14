@@ -30,8 +30,7 @@
             android:layout_height="wrap_content"
             android:text="Add New"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:theme="@style/Button.Blue"/>
+            app:layout_constraintEnd_toEndOf="parent"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
