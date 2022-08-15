@@ -22,7 +22,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:hint="New PoGo String"
             app:layout_constraintEnd_toStartOf="@+id/btnNewString"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_margin="10dp"/>
 
     <Button
             android:id="@+id/btnNewString"
@@ -30,7 +31,8 @@
             android:layout_height="wrap_content"
             android:text="Add New"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_margin="10dp"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
