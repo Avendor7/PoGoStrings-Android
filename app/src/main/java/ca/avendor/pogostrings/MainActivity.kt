@@ -2,7 +2,6 @@ package ca.avendor.pogostrings
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -12,8 +11,6 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.stringitem.*
-import java.lang.reflect.Type
 
 class MainActivity : AppCompatActivity() {
 
@@ -140,7 +137,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadData() {
         val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
         val gson = Gson()
-        val json = sharedPreferences.getString("task list", "")
+        val json = sharedPreferences.getString("task list", "[]")
         val type = object: TypeToken<ArrayList<PoGoString>>() {
         }.type
 
