@@ -24,14 +24,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
+        //grab the item view
         rvStringItems = findViewById(R.id.rvStringItems)
+        //load the data from the stored preferences
         loadData()
+        //adapter things
         poGoStringAdapter = PoGoStringAdapter(pogoStringList)
 
         rvStringItems.adapter = poGoStringAdapter
         rvStringItems.layoutManager = LinearLayoutManager(this)
 
+        //Add New button
         btnNewString.setOnClickListener {
 
 
@@ -43,6 +46,7 @@ class MainActivity : AppCompatActivity() {
                 .show()
 
         }
+        // slide to delete helper
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -98,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         pogoStringList.add(PoGoString(stringitem))
 
     }
+    //save to shared preferences. Converts to Json in order to save
     private fun saveData() {
         val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
