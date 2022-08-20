@@ -24,8 +24,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //pogoStringList = ArrayList()
-        //pogoStringList.add(PoGoString("Hello world"))
+
         rvStringItems = findViewById(R.id.rvStringItems)
         loadData()
         poGoStringAdapter = PoGoStringAdapter(pogoStringList)
@@ -35,33 +34,8 @@ class MainActivity : AppCompatActivity() {
 
         btnNewString.setOnClickListener {
 
+
             addItemToList(etNewString.text.toString())
-
-            /*
-            // method for saving the data in array list.
-            // creating a variable for storing data in
-            // shared preferences.
-            val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
-
-            // creating a variable for editor to
-            // store data in shared preferences.
-            val editor = sharedPreferences.edit()
-
-            // creating a new variable for gson.
-            val gson = Gson()
-
-            // getting data from gson and storing it in a string.
-            val json: String = gson.toJson(pogoStringList)
-
-            // below line is to save data in shared
-            // prefs in the form of string.
-            editor.putString("poGoStrings", json)
-
-            // below line is to apply changes
-            // and save data in shared prefs.
-            editor.apply()
-
-            // after saving data we are displaying a toast message.*/
 
             poGoStringAdapter.notifyDataSetChanged()
             saveData()
