@@ -24,44 +24,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //pogoStringList = ArrayList()
-        //pogoStringList.add(PoGoString("Hello world"))
+        //grab the item view
         rvStringItems = findViewById(R.id.rvStringItems)
+        //load the data from the stored preferences
         loadData()
+        //adapter things
         poGoStringAdapter = PoGoStringAdapter(pogoStringList)
 
         rvStringItems.adapter = poGoStringAdapter
         rvStringItems.layoutManager = LinearLayoutManager(this)
 
+        //Add New button
         btnNewString.setOnClickListener {
 
+
             addItemToList(etNewString.text.toString())
-
-            /*
-            // method for saving the data in array list.
-            // creating a variable for storing data in
-            // shared preferences.
-            val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
-
-            // creating a variable for editor to
-            // store data in shared preferences.
-            val editor = sharedPreferences.edit()
-
-            // creating a new variable for gson.
-            val gson = Gson()
-
-            // getting data from gson and storing it in a string.
-            val json: String = gson.toJson(pogoStringList)
-
-            // below line is to save data in shared
-            // prefs in the form of string.
-            editor.putString("poGoStrings", json)
-
-            // below line is to apply changes
-            // and save data in shared prefs.
-            editor.apply()
-
-            // after saving data we are displaying a toast message.*/
 
             poGoStringAdapter.notifyDataSetChanged()
             saveData()
@@ -69,6 +46,7 @@ class MainActivity : AppCompatActivity() {
                 .show()
 
         }
+        // slide to delete helper
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -124,6 +102,7 @@ class MainActivity : AppCompatActivity() {
         pogoStringList.add(PoGoString(stringitem))
 
     }
+    //save to shared preferences. Converts to Json in order to save
     private fun saveData() {
         val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
