@@ -37,13 +37,17 @@ class MainActivity : AppCompatActivity() {
         //Add New button
         btnNewString.setOnClickListener {
 
+            if (!etNewString.text.toString().isNullOrEmpty()){
+                addItemToList(etNewString.text.toString())
 
-            addItemToList(etNewString.text.toString())
-
-            poGoStringAdapter.notifyDataSetChanged()
-            saveData()
-            Toast.makeText(this, "Saved Array List to Shared preferences. ", Toast.LENGTH_SHORT)
-                .show()
+                poGoStringAdapter.notifyDataSetChanged()
+                saveData()
+                Toast.makeText(this, "Saved new string. ", Toast.LENGTH_SHORT)
+                    .show()
+            }else{
+                Toast.makeText(this, "String empty. ", Toast.LENGTH_SHORT)
+                    .show()
+            }
 
         }
         // slide to delete helper
@@ -75,8 +79,6 @@ class MainActivity : AppCompatActivity() {
                 // below line is to notify our item is removed from adapter.
                 poGoStringAdapter.notifyItemRemoved(viewHolder.adapterPosition)
 
-                // below line is to display our snackbar with action.
-                // below line is to display our snackbar with action.
                 // below line is to display our snackbar with action.
                 Snackbar.make(rvStringItems, "Deleted " + deletedItem.item, Snackbar.LENGTH_LONG)
                     .setAction(
