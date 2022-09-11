@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
                 poGoStringAdapter.notifyDataSetChanged()
                 saveData()
-                Toast.makeText(this, "Saved Array List to Shared preferences. ", Toast.LENGTH_SHORT)
+                Toast.makeText(this, "Saved new string. ", Toast.LENGTH_SHORT)
                     .show()
             }else{
                 Toast.makeText(this, "String empty. ", Toast.LENGTH_SHORT)
