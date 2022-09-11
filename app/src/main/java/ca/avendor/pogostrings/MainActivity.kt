@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 
                 // below line is to notify our item is removed from adapter.
                 poGoStringAdapter.notifyItemRemoved(viewHolder.adapterPosition)
-
+                saveData()
                 // below line is to display our snackbar with action.
                 Snackbar.make(rvStringItems, "Deleted " + deletedItem.item, Snackbar.LENGTH_LONG)
                     .setAction(
@@ -91,6 +91,7 @@ class MainActivity : AppCompatActivity() {
                             // below line is to notify item is
                             // added to our adapter class.
                             poGoStringAdapter.notifyItemInserted(position)
+                            saveData()
                         }).show()
             }
             // at last we are adding this
