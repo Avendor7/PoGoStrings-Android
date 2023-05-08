@@ -6,6 +6,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ca.avendor.pogostrings.ui.theme.PoGoStringsTheme
+import com.google.android.material.textfield.TextInputEditText
 
 
 class MainActivity : AppCompatActivity() {
@@ -48,7 +51,6 @@ class MainActivity : AppCompatActivity() {
 
 
         setContentView(R.layout.activity_main)
-
 
 
         //grab the item view
@@ -127,7 +129,11 @@ class MainActivity : AppCompatActivity() {
     }
     @Composable
     fun PoGoStringsApp(){
-
+        LazyColumn(){
+            items(pogoStringList.size){ index ->
+                Text(text = pogoStringList[index].item)
+            }
+        }
     }
 
     @Preview(showBackground = true)
