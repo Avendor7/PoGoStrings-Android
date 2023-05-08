@@ -4,6 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +14,13 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import ca.avendor.pogostrings.ui.theme.PoGoStringsTheme
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,7 +32,24 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setContent{
+            PoGoStringsTheme{
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    PoGoStringsApp()
+                }
+            }
+
+        }
+
+
         setContentView(R.layout.activity_main)
+
+
 
         //grab the item view
         rvStringItems = findViewById(R.id.rvStringItems)
@@ -98,6 +125,19 @@ class MainActivity : AppCompatActivity() {
             // to our recycler view.
         }).attachToRecyclerView(rvStringItems)
     }
+    @Composable
+    fun PoGoStringsApp(){
+
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    fun PoGoStringsAppPreview() {
+        PoGoStringsTheme {
+            PoGoStringsApp()
+        }
+    }
+
     private fun addItemToList(stringitem: String) {
         // in this method we are adding item to list and
         // notifying adapter that data has changed
