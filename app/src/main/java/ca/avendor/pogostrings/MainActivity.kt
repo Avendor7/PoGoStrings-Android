@@ -1,10 +1,9 @@
 package ca.avendor.pogostrings
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,22 +13,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.runtime.Composable
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.*
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ca.avendor.pogostrings.ui.theme.PoGoStringsTheme
-import com.google.android.material.textfield.TextInputEditText
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 
 class MainActivity : AppCompatActivity() {
@@ -134,23 +133,53 @@ class MainActivity : AppCompatActivity() {
 //            // to our recycler view.
 //        }).attachToRecyclerView(rvStringItems)
     }
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun PoGoStringsApp(){
+        val newString = remember { mutableStateOf(TextFieldValue()) }
+        val stringListState = getStringList()
+
+
         Column{
             LazyColumn(Modifier.weight(1f)) {
-                items(10,) { i ->
+                items(stringListState.size) { i ->
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ){
-                        Text("Row $i")
-                        Button(onClick = { println("hi") }) {
+                        Text("$i")
+                        Button(onClick = {
+                            //Copy item to clipboard
+
+                        }) {
                             Text("Android")
                         }
                     }
                     Divider()
+                }
+
+            }
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+
+            ){
+                TextField(
+                    value = newString.value,
+                    onValueChange = {newString.value = it},
+                    label = { Text("New String") }
+                )
+                Button(onClick = {
+                    //Save the newString.Value to the list
+                    addToStringList(newString.value.text)
+                    println("Added new string")
+                }) {
+                    Text("Add New")
                 }
             }
         }
@@ -163,7 +192,28 @@ class MainActivity : AppCompatActivity() {
             PoGoStringsApp()
         }
     }
-//
+
+    private fun addToStringList(): String {
+        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
+        val gson = Gson()
+        val json = sharedPreferences.getString("task list", "[]")
+        val prefs = getSharedPreferences(PreferenceManager.PREFERENCE_NAME, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.putString(PreferenceManager.POGO_STRING_LIST, json)
+        editor.apply()
+    }
+    private fun getStringList(): List<String> {
+        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
+        val gson = Gson()
+        val json = sharedPreferences.getString("task list", "[]")
+        val type = object: TypeToken<ArrayList<PoGoString>>() {
+        }.type
+
+        if(json == null)
+            return ArrayList()
+        else
+            return gson.fromJson(json, type)
+    }
 //    private fun addItemToList(stringitem: String) {
 //        // in this method we are adding item to list and
 //        // notifying adapter that data has changed
