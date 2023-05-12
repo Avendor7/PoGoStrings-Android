@@ -33,8 +33,7 @@ import com.google.gson.reflect.TypeToken
 
 class MainActivity : AppCompatActivity() {
 
-    //lateinit var pogoStringList: ArrayList<PoGoString>
-
+    var pogoStringList: ArrayList<PoGoString> = ArrayList<PoGoString>()
     //private lateinit var poGoStringAdapter: PoGoStringAdapter
 
     //lateinit var rvStringItems: RecyclerView
@@ -137,12 +136,11 @@ class MainActivity : AppCompatActivity() {
     @Composable
     fun PoGoStringsApp(){
         val newString = remember { mutableStateOf(TextFieldValue()) }
-        val stringListState = getStringList()
-
-
+        val stringListState = remember { mutableStateOf(pogoStringList) }
+        println(pogoStringList.toString())
         Column{
             LazyColumn(Modifier.weight(1f)) {
-                items(stringListState.size) { i ->
+                items(5) { i ->
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -176,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                 )
                 Button(onClick = {
                     //Save the newString.Value to the list
-                    addToStringList(newString.value.text)
+                    addItemToList(newString.value.text)
                     println("Added new string")
                 }) {
                     Text("Add New")
@@ -193,16 +191,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun addToStringList(): String {
+    private fun addToStringList() {
         val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
         val gson = Gson()
-        val json = sharedPreferences.getString("task list", "[]")
-        val prefs = getSharedPreferences(PreferenceManager.PREFERENCE_NAME, Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-        editor.putString(PreferenceManager.POGO_STRING_LIST, json)
+        val json = gson.toJson(pogoStringList)
+        editor.putString("task list", json)
         editor.apply()
     }
-    private fun getStringList(): List<String> {
+    private fun getStringList(): ArrayList<PoGoString> {
         val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
         val gson = Gson()
         val json = sharedPreferences.getString("task list", "[]")
@@ -210,18 +207,27 @@ class MainActivity : AppCompatActivity() {
         }.type
 
         if(json == null)
-            return ArrayList()
+            pogoStringList = ArrayList()
         else
-            return gson.fromJson(json, type)
+            pogoStringList = gson.fromJson(json, type)
+    return pogoStringList
+}
+    private fun addItemToList(stringitem: String) {
+        // in this method we are adding item to list and
+        // notifying adapter that data has changed
+
+        //clear the textbox
+        //etNewString.text.clear()
+
+        //adds the string and updates the display
+
+        pogoStringList.add(PoGoString(stringitem))
+        addToStringList()
     }
-//    private fun addItemToList(stringitem: String) {
-//        // in this method we are adding item to list and
-//        // notifying adapter that data has changed
-//        etNewString.text.clear()
-//        pogoStringList.add(PoGoString(stringitem))
-//
-//    }
-//    //save to shared preferences. Converts to Json in order to save
+        //pogoStringList.add(PoGoString(stringitem))
+
+
+    //save to shared preferences. Converts to Json in order to save
 //    private fun saveData() {
 //        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
 //        val editor = sharedPreferences.edit()
