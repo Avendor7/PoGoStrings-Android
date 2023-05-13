@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -78,6 +80,7 @@ class MainActivity : AppCompatActivity() {
 //https://daanidev.medium.com/swipe-to-delete-in-jetpack-compose-android-ca935a209c61
                     SwipeToDismiss(
                         state = dismissState,
+                        modifier = Modifier.padding(vertical = 1.dp),
                         background = {
                             val color by animateColorAsState(
                                 when (dismissState.targetValue) {
@@ -88,13 +91,30 @@ class MainActivity : AppCompatActivity() {
 
                         },
                         dismissContent = {
-                            Text(pogoStringList[i].item)
-                            Button(onClick = {
-                                //Copy item to clipboard
+                            Card (
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                            )
+                            {
+                                Column(Modifier.padding(16.dp)){
+                                    Row (
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                    ){
+                                        Text(pogoStringList[i].item)
+                                        Button(
+                                            onClick = {},
+                                            Modifier.widthIn(100.dp),
+                                        ) {
+                                            Text("Android")
+                                        }
+                                    }
+                                }
 
-                            }) {
-                                Text("Android")
+
                             }
+
                         }
                     )
                     Divider()
@@ -118,6 +138,7 @@ class MainActivity : AppCompatActivity() {
                     //Save the newString.Value to the list
                     addItemToList(newString.value.text)
                     println("Added new string")
+                    Modifier.widthIn(100.dp)
                 }) {
                     Text("Add New")
                 }
