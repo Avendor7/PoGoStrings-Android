@@ -136,18 +136,19 @@ class MainActivity : AppCompatActivity() {
     @Composable
     fun PoGoStringsApp(){
         val newString = remember { mutableStateOf(TextFieldValue()) }
+        getStringList()
         val stringListState = remember { mutableStateOf(pogoStringList) }
-        println(pogoStringList.toString())
+
         Column{
             LazyColumn(Modifier.weight(1f)) {
-                items(5) { i ->
+                items(pogoStringList.count()) { i ->
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .padding(8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ){
-                        Text("$i")
+                        Text(pogoStringList[i].item)
                         Button(onClick = {
                             //Copy item to clipboard
 
@@ -164,7 +165,7 @@ class MainActivity : AppCompatActivity() {
                 Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+//                horizontalArrangement = Arrangement.SpaceBetween,
 
             ){
                 TextField(
@@ -196,31 +197,21 @@ class MainActivity : AppCompatActivity() {
         val editor = sharedPreferences.edit()
         val gson = Gson()
         val json = gson.toJson(pogoStringList)
-        editor.putString("task list", json)
+        editor.putString("strings", json)
         editor.apply()
     }
     private fun getStringList(): ArrayList<PoGoString> {
         val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
         val gson = Gson()
-        val json = sharedPreferences.getString("task list", "[]")
-        val type = object: TypeToken<ArrayList<PoGoString>>() {
-        }.type
+        val json = sharedPreferences.getString("strings", "[]")
 
         if(json == null)
             pogoStringList = ArrayList()
         else
-            pogoStringList = gson.fromJson(json, type)
+            pogoStringList = gson.fromJson(json, object : TypeToken<ArrayList<PoGoString>>() {}.type)
     return pogoStringList
 }
     private fun addItemToList(stringitem: String) {
-        // in this method we are adding item to list and
-        // notifying adapter that data has changed
-
-        //clear the textbox
-        //etNewString.text.clear()
-
-        //adds the string and updates the display
-
         pogoStringList.add(PoGoString(stringitem))
         addToStringList()
     }
