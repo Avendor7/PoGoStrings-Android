@@ -4,24 +4,32 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Button
+import androidx.compose.material3.DismissValue
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,109 +61,42 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-
-//
-//        setContentView(R.layout.activity_main)
-//
-//
-//        //grab the item view
-//        rvStringItems = findViewById(R.id.rvStringItems)
-//        //load the data from the stored preferences
-//        loadData()
-//        //adapter things
-//        poGoStringAdapter = PoGoStringAdapter(pogoStringList)
-//
-//        rvStringItems.adapter = poGoStringAdapter
-//        rvStringItems.layoutManager = LinearLayoutManager(this)
-//
-//        //Add New button
-//        btnNewString.setOnClickListener {
-//
-//            if (!etNewString.text.toString().isNullOrEmpty()){
-//                addItemToList(etNewString.text.toString())
-//
-//                poGoStringAdapter.notifyDataSetChanged()
-//                saveData()
-//                Toast.makeText(this, "Saved new string. ", Toast.LENGTH_SHORT)
-//                    .show()
-//            }else{
-//                Toast.makeText(this, "String empty. ", Toast.LENGTH_SHORT)
-//                    .show()
-//            }
-//
-//        }
-//        // slide to delete helper
-//        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-//            override fun onMove(
-//                recyclerView: RecyclerView,
-//                viewHolder: RecyclerView.ViewHolder,
-//                target: RecyclerView.ViewHolder
-//            ): Boolean {
-//                // this method is called
-//                // when the item is moved.
-//                return false
-//            }
-//
-//            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-//                // this method is called when we swipe our item to right direction.
-//                // on below line we are getting the item at a particular position.
-//                val deletedItem: PoGoString =
-//                    pogoStringList.get(viewHolder.adapterPosition)
-//
-//                // below line is to get the position
-//                // of the item at that position.
-//                val position = viewHolder.adapterPosition
-//
-//                // this method is called when item is swiped.
-//                // below line is to remove item from our array list.
-//                pogoStringList.removeAt(viewHolder.adapterPosition)
-//
-//                // below line is to notify our item is removed from adapter.
-//                poGoStringAdapter.notifyItemRemoved(viewHolder.adapterPosition)
-//                saveData()
-//                // below line is to display our snackbar with action.
-//                Snackbar.make(rvStringItems, "Deleted " + deletedItem.item, Snackbar.LENGTH_LONG)
-//                    .setAction(
-//                        "Undo",
-//                        View.OnClickListener {
-//                            // adding on click listener to our action of snack bar.
-//                            // below line is to add our item to array list with a position.
-//                            pogoStringList.add(position, deletedItem)
-//
-//                            // below line is to notify item is
-//                            // added to our adapter class.
-//                            poGoStringAdapter.notifyItemInserted(position)
-//                            saveData()
-//                        }).show()
-//            }
-//            // at last we are adding this
-//            // to our recycler view.
-//        }).attachToRecyclerView(rvStringItems)
     }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun PoGoStringsApp(){
         val newString = remember { mutableStateOf(TextFieldValue()) }
         getStringList()
-        val stringListState = remember { mutableStateOf(pogoStringList) }
 
         Column{
             LazyColumn(Modifier.weight(1f)) {
                 items(pogoStringList.count()) { i ->
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ){
-                        Text(pogoStringList[i].item)
-                        Button(onClick = {
-                            //Copy item to clipboard
+                    val dismissState = rememberDismissState()
+                    //TODO when this is swiped, remove the item from the list
+                    //TODO max width
+//https://daanidev.medium.com/swipe-to-delete-in-jetpack-compose-android-ca935a209c61
+                    SwipeToDismiss(
+                        state = dismissState,
+                        background = {
+                            val color by animateColorAsState(
+                                when (dismissState.targetValue) {
+                                    DismissValue.Default -> Color.White
+                                    else -> Color.Red
+                                }, label = "blah"
+                            )
 
-                        }) {
-                            Text("Android")
+                        },
+                        dismissContent = {
+                            Text(pogoStringList[i].item)
+                            Button(onClick = {
+                                //Copy item to clipboard
+
+                            }) {
+                                Text("Android")
+                            }
                         }
-                    }
+                    )
                     Divider()
                 }
 
