@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
     @Composable
     fun PoGoStringsApp(){
         val newString = remember { mutableStateOf(TextFieldValue()) }
+
         getStringList()
 
         Column{
@@ -174,7 +175,11 @@ class MainActivity : AppCompatActivity() {
     return pogoStringList
 }
     private fun addItemToList(stringitem: String) {
-        pogoStringList.add(PoGoString(stringitem))
+        if(pogoStringList.isEmpty()) {
+            pogoStringList.add(PoGoString(0, stringitem))
+        }else {
+            pogoStringList.add(PoGoString(pogoStringList.last().id + 1, stringitem))
+        }
         addToStringList()
     }
         //pogoStringList.add(PoGoString(stringitem))
