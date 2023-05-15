@@ -25,7 +25,10 @@ class pogoStringViewModel: ViewModel() {
     //val pogoStringList: ArrayList<PoGoString> = ArrayList<PoGoString>()
 
     fun addString(newString: String) {
-        stringList.add(PoGoString(stringList.last().id +1, newString))
+        if (stringList.isEmpty())
+            stringList.add(PoGoString(0, newString))
+        else
+            stringList.add(PoGoString(stringList.last().id +1, newString))
     }
     fun removeString(stringItem: PoGoString){
         val index = stringList.indexOf(stringItem)
