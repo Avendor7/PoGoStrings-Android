@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.SwipeToDismiss
@@ -32,10 +34,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -46,19 +51,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ca.avendor.pogostrings.ui.theme.PoGoStringsTheme
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-
+import androidx.compose.foundation.lazy.items
 
 class MainActivity : AppCompatActivity() {
-
-    var pogoStringList: ArrayList<PoGoString> = ArrayList<PoGoString>()
-
-
-
-    //private lateinit var poGoStringAdapter: PoGoStringAdapter
-
-    //lateinit var rvStringItems: RecyclerView
+    private val viewModel = pogoStringViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,95 +66,87 @@ class MainActivity : AppCompatActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    PoGoStringsApp()
+                    PoGoStringsApp(viewModel = viewModel)
                 }
             }
 
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
-    fun PoGoStringsApp(){
+    fun PoGoStringsApp(viewModel: pogoStringViewModel){
         val newString = remember { mutableStateOf(TextFieldValue()) }
 
 
-        getStringList()
+
+        val pogoStringState = viewModel.pogoStringFlow.collectAsState();
+        val lazyListState = rememberLazyListState()
+
+
 
         Column{
-            LazyColumn(Modifier.weight(1f)) {
-                items(pogoStringList.size) { item ->
-                    val dismissState = rememberDismissState()
-                    if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                       // pogoStringList.removeAll(pogoStringList.filter { it.id == item })
-                        pogoStringList.removeAt(item)
-                        //save list
-                        saveData()
-                        getStringList()
-                    }
-                    SwipeToDismiss(
-                        state = dismissState,
-                        directions = setOf(
-                            DismissDirection.EndToStart
-                        ),
-                        modifier = Modifier.padding(vertical = 1.dp),
-                        background = {
-                            val color by animateColorAsState(
-                                when (dismissState.targetValue) {
-                                    DismissValue.Default -> Color.White
-                                    else -> Color.Red
-                                }, label = "blah"
-                            )
-                            val scale by animateFloatAsState(
-                                if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f,
-                                label = ""
-                            )
-                            val alignment = Alignment.CenterEnd
-                            val icon = Icons.Default.Delete
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(color)
-                                    .padding(horizontal = Dp(20f)),
-                                contentAlignment = alignment
-                            ) {
-                                Icon(
-                                    icon,
-                                    contentDescription = "Delete Icon",
-                                    modifier = Modifier.scale(scale)
-                                )
+            LazyColumn(
+                state = lazyListState
+            ){
+                items(
+                    items = pogoStringState.value,
+                    key = { item -> item.id },
+                    itemContent = { item ->
+                        val currentItem by rememberUpdatedState(item)
+                        val dismissState = rememberDismissState(
+                            confirmValueChange = {
+                                if (it == DismissValue.DismissedToStart) {
+                                    viewModel.removeString(currentItem)
+                                    true
+                                } else false
                             }
-                        },
-                        dismissContent = {
-                            Card (
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                            )
-                            {
-                                Column(Modifier.padding(16.dp)){
-                                    Row (
-                                        Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                    ){
-                                        Text(pogoStringList[item].id.toString() + " " + pogoStringList[item].item)
-                                        Button(
-                                            onClick = {},
-                                            Modifier.widthIn(100.dp),
-                                        ) {
-                                            Text("Android")
-                                        }
-                                    }
-                                }
+                        )
 
-
-                            }
-
+                        if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                            viewModel.removeString(item)
                         }
-                    )
-                    Divider()
-                }
 
+                        SwipeToDismiss(
+                            state = dismissState,
+                            directions = setOf(
+                                DismissDirection.EndToStart
+                            ),
+                            modifier = Modifier.padding(vertical = 1.dp),
+                            background = {
+                                val color by animateColorAsState(
+                                    when (dismissState.targetValue) {
+                                        DismissValue.Default -> Color.White
+                                        else -> Color.Red
+                                    }, label = "blah"
+                                )
+                                val scale by animateFloatAsState(
+                                    if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f,
+                                    label = ""
+                                )
+                                val alignment = Alignment.CenterEnd
+                                val icon = Icons.Default.Delete
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(color)
+                                        .padding(horizontal = Dp(20f)),
+                                    contentAlignment = alignment
+                                ) {
+                                    Icon(
+                                        icon,
+                                        contentDescription = "Delete Icon",
+                                        modifier = Modifier.scale(scale)
+                                    )
+                                }
+                            },
+                            dismissContent = {
+                                PoGoStringItemRow(item, pogoStringState, viewModel)
+                            }
+                        )
+                    }
+
+                )
             }
 
             Row(
@@ -174,7 +162,7 @@ class MainActivity : AppCompatActivity() {
                     label = { Text("New String") }
                 )
                 Button(onClick = {
-                    addToStringList(newString.value.text)
+                    viewModel.addString(newString.value.text)
                     //save the list
 
                     println("Added new string")
@@ -190,61 +178,8 @@ class MainActivity : AppCompatActivity() {
     @Composable
     fun PoGoStringsAppPreview() {
         PoGoStringsTheme {
-            PoGoStringsApp()
+            PoGoStringsApp(viewModel)
         }
     }
 
-    private fun addToStringList(stringitem: String) {
-
-        //val pogoStringList: ArrayList<PoGoString> = ArrayList<PoGoString>()
-       // val pogoStringList = getStringList()
-        if(pogoStringList.isEmpty()) {
-            pogoStringList.add(PoGoString(0, stringitem))
-        }else {
-            pogoStringList.add(PoGoString(pogoStringList.last().id + 1, stringitem))
-        }
-        saveData()
-    }
-    private fun getStringList(): ArrayList<PoGoString> {
-
-        //var pogoStringList: ArrayList<PoGoString> = ArrayList<PoGoString>()
-        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
-        val gson = Gson()
-        val json = sharedPreferences.getString("strings", "[]")
-
-        if(json == null)
-            pogoStringList = ArrayList()
-        else
-            pogoStringList = gson.fromJson(json, object : TypeToken<ArrayList<PoGoString>>() {}.type)
-
-    return pogoStringList
-}
-
-        //pogoStringList.add(PoGoString(stringitem))
-
-
-    //save to shared preferences. Converts to Json in order to save
-    private fun saveData() {
-
-        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val gson = Gson()
-        val json = gson.toJson(pogoStringList)
-        editor.putString("strings", json)
-        editor.apply()
-
-    }
-//
-//    private fun loadData() {
-//        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
-//        val gson = Gson()
-//        val json = sharedPreferences.getString("task list", "[]")
-//        val type = object: TypeToken<ArrayList<PoGoString>>() {
-//        }.type
-//
-//        if(json == null)
-//            pogoStringList = ArrayList()
-//        else
-//            pogoStringList = gson.fromJson(json, type)
-//    }
 }
