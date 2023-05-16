@@ -30,6 +30,7 @@ fun PoGoStringItemRow(
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
+
             ) {
                 Text(item.id.toString() + " " + item.textString)
                 Button(
