@@ -1,13 +1,18 @@
 package ca.avendor.pogostrings
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateListOf
+import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.util.prefs.Preferences
+
 class pogoStringViewModel: ViewModel() {
+    // At the top level of your kotlin file:
 
 
     private var stringList = mutableStateListOf(
@@ -20,7 +25,7 @@ class pogoStringViewModel: ViewModel() {
     //private val _pogoStringFlow = MutableStateFlow<List<PoGoString>>(getStringList())
     private val _pogoStringFlow = MutableStateFlow<List<PoGoString>>(stringList)
 
-    val pogoStringFlow: StateFlow<List<PoGoString>> get() = _pogoStringFlow
+    val pogoStringFlow get() = _pogoStringFlow
 
     //val pogoStringList: ArrayList<PoGoString> = ArrayList<PoGoString>()
 
@@ -34,7 +39,7 @@ class pogoStringViewModel: ViewModel() {
         val index = stringList.indexOf(stringItem)
         stringList.remove(stringList[index])
     }
-//
+////
 //    private fun addToStringList(stringitem: String) {
 //
 //        //val pogoStringList: ArrayList<PoGoString> = ArrayList<PoGoString>()
@@ -45,21 +50,35 @@ class pogoStringViewModel: ViewModel() {
 //            pogoStringList.add(PoGoString(pogoStringList.last().id + 1, stringitem))
 //        }
 //        saveData()
+//
+//        val gson = Gson()
+//        val mutableStringList = stringList
+//
+//        val regularList = mutableStringList.toList()
+//        val jsonString = gson.toJson(regularList)
+//
+//        Context.dataStore.edit { preferences ->
+//            preferences[PreferencesKeys.MyMutableList] = jsonString
+//        }
+//
+//
+//
 //    }
 //    private fun getStringList(): ArrayList<PoGoString> {
 //        //TODO replace shared preferences with datastore
 //        //https://developer.android.com/jetpack/androidx/releases/datastore
+//        //https://developer.android.com/topic/libraries/architecture/datastore#additional-resources
 //        //
 //        val sharedPreferences = getSharedPreferences("shared preferences",
 //            AppCompatActivity.MODE_PRIVATE
 //        )
 //        val gson = Gson()
-//        val json = sharedPreferences.getString("strings", "[]")
+//        val json = stringPreferencesKey("pogoStringList");
 //
 //        if(json == null)
-//            pogoStringList = ArrayList()
+//            stringList = ArrayList<PoGoString>()
 //        else
-//            pogoStringList = gson.fromJson(json, object : TypeToken<ArrayList<PoGoString>>() {}.type)
+//            stringList = gson.fromJson(json, object : TypeToken<ArrayList<PoGoString>>() {}.type)
 //
 //        return pogoStringList
 //    }
