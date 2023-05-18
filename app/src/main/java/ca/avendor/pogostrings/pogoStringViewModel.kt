@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateListOf
 import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -11,9 +12,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.prefs.Preferences
 
-class pogoStringViewModel: ViewModel() {
-    // At the top level of your kotlin file:
 
+private const val STRING_LIST_PREFERENCE = "string_list_preference"
+
+private val Context.dataStore by preferencesDataStore(
+    name = STRING_LIST_PREFERENCE
+)
+
+class pogoStringViewModel: ViewModel() {
 
     private var stringList = mutableStateListOf(
         PoGoString(0, "My First Task"),
