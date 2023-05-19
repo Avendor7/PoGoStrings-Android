@@ -58,8 +58,12 @@ import androidx.compose.foundation.lazy.items
 class MainActivity : AppCompatActivity() {
     private val viewModel = pogoStringViewModel()
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
 
         setContent{
             PoGoStringsTheme{
