@@ -20,32 +20,17 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
-
-private val USER_PREFERENCES_NAME = "user_preferences"
-
-private val Context.dataStore by preferencesDataStore(
-    name = "PreferenceDataStore"
-)
-
-class pogoStringViewModel(context: Context): ViewModel() {
-
-    //Should probably implement it properly with helpers and whatnot
-    //https://www.droidcon.com/2023/01/08/preference-datastore-the-generic-way/
-
-
-    private val datasource = context.dataStore
-
-//    private var stringList = mutableStateListOf(
-//        PoGoString(0, "My First Task"),
-//        PoGoString(1, "My Second Task"),
-//        PoGoString(2, "My Third Task"),
-//
-//    )
+class pogoStringViewModel(): ViewModel() {
 
 
 
+    private var stringList = mutableStateListOf(
+        PoGoString(0, "My First Task"),
+        PoGoString(1, "My Second Task"),
+        PoGoString(2, "My Third Task"),
 
-    var stringList = getStringList()
+    )
+
 
     //private val _pogoStringFlow = MutableStateFlow<List<PoGoString>>(getStringList())
     private val _pogoStringFlow = MutableStateFlow<List<PoGoString>>(stringList)
@@ -66,54 +51,54 @@ class pogoStringViewModel(context: Context): ViewModel() {
         val index = stringList.indexOf(stringItem)
         stringList.remove(stringList[index])
     }
-
-    suspend fun addToStringList(stringitem: String) {
-
-        val gson = Gson()
-        val mutableStringList = stringList
-
-        val regularList = mutableStringList.toList()
-        val jsonString = gson.toJson(regularList)
-
-
-        datasource.edit {
-            it[stringPreferencesKey("pogoStringList")] = jsonString
-        }
-    }
-
-
-    suspend fun getStringList(): SnapshotStateList<PoGoString> {
-        //TODO replace shared preferences with datastore
-        //https://developer.android.com/jetpack/androidx/releases/datastore
-        //https://developer.android.com/topic/libraries/architecture/datastore#additional-resources
-        //
-        val dataStoreFlow: Flow<Any> = datasource.data
-            .map { preferences ->
-                // No type safety.
-                preferences[stringPreferencesKey("pogoStringList")] ?: 0
-            }
-            .catch { exception ->
-                // dataStore.data throws an IOException when an error is encountered when reading data
-                // No type safety.
-                if (exception is IOException) {
-                    emit(0)
-                } else {
-                    throw exception
-                }
-            }
-
-        val value = dataStoreFlow.first()
-
-        val gson = Gson()
-        val json = value
-
-        if(json == null)
-            stringList = gson.fromJson("[]", object : TypeToken<ArrayList<PoGoString>>() {}.type)
-        else
-            stringList = gson.fromJson(json.toString(), object : TypeToken<ArrayList<PoGoString>>() {}.type)
-
-        return stringList
-    }
+//
+//    suspend fun addToStringList(stringitem: String) {
+//
+//        val gson = Gson()
+//        val mutableStringList = stringList
+//
+//        val regularList = mutableStringList.toList()
+//        val jsonString = gson.toJson(regularList)
+//
+//
+//        datasource.edit {
+//            it[stringPreferencesKey("pogoStringList")] = jsonString
+//        }
+//    }
+//
+//
+//    suspend fun getStringList(): SnapshotStateList<PoGoString> {
+//        //TODO replace shared preferences with datastore
+//        //https://developer.android.com/jetpack/androidx/releases/datastore
+//        //https://developer.android.com/topic/libraries/architecture/datastore#additional-resources
+//        //
+//        val dataStoreFlow: Flow<Any> = datasource.data
+//            .map { preferences ->
+//                // No type safety.
+//                preferences[stringPreferencesKey("pogoStringList")] ?: 0
+//            }
+//            .catch { exception ->
+//                // dataStore.data throws an IOException when an error is encountered when reading data
+//                // No type safety.
+//                if (exception is IOException) {
+//                    emit(0)
+//                } else {
+//                    throw exception
+//                }
+//            }
+//
+//        val value = dataStoreFlow.first()
+//
+//        val gson = Gson()
+//        val json = value
+//
+//        if(json == null)
+//            stringList = gson.fromJson("[]", object : TypeToken<ArrayList<PoGoString>>() {}.type)
+//        else
+//            stringList = gson.fromJson(json.toString(), object : TypeToken<ArrayList<PoGoString>>() {}.type)
+//
+//        return stringList
+//    }
 //
 //    //pogoStringList.add(PoGoString(stringitem))
 //
