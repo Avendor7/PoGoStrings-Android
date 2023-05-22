@@ -13,11 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.buildAnnotatedString
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -61,7 +59,7 @@ fun PoGoStringItemRow(
                     },
                     Modifier.widthIn(100.dp),
                 ) {
-                    Text("Android")
+                    Text("Copy")
                 }
             }
         }
