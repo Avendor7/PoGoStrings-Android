@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.State
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.buildAnnotatedString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -23,6 +25,17 @@ fun PoGoStringItemRow(
     item: PoGoString,
     snackbarHostState: SnackbarHostState,
 ) {
+
+    val clipboardManager = LocalClipboardManager.current
+
+    // Function to copy the text to the clipboard and show a toast notification
+    fun copyTextToClipboard(text: String) {
+        val annotatedString = buildAnnotatedString {
+            append(text)
+        }
+        clipboardManager.setText(annotatedString)
+    }
+
     val scope = rememberCoroutineScope()
     Card(
         Modifier
@@ -39,11 +52,10 @@ fun PoGoStringItemRow(
                 Text(item.pogoStringItem)
                 Button(
                     onClick = {
-                        //TODO redo the copy to clipboard stuff, see chatgpt history
-                        // show snackbar as a suspend function
+                        copyTextToClipboard(item.pogoStringItem)
                         scope.launch {
                             snackbarHostState.showSnackbar(
-                                "Snackbar"
+                                "Copied To Clipboard"
                             )
                         }
                     },
