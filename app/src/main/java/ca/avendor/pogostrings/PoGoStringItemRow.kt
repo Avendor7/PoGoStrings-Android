@@ -17,7 +17,7 @@ import androidx.compose.runtime.State
 @Composable
 fun PoGoStringItemRow(
     item: PoGoString,
-    pogoStringState: State<List<PoGoString>>,
+    pogoStringState: PoGoStringsState,
     viewModel: pogoStringViewModel
 ) {
     Card(

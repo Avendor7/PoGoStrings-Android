@@ -5,8 +5,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [PoGoString::class],
-    version = 1,
-    exportSchema = false
+    version = 1
 )
 
 abstract class PoGoStringsDatabase: RoomDatabase() {

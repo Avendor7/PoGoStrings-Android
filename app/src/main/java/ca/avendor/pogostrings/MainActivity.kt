@@ -2,21 +2,13 @@ package ca.avendor.pogostrings
 
 import android.content.Context
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -52,27 +44,44 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ca.avendor.pogostrings.ui.theme.PoGoStringsTheme
 import androidx.compose.foundation.lazy.items
-
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.room.Room
+import ca.avendor.pogostrings.ui.theme.PoGoStringsTheme
 class MainActivity : AppCompatActivity() {
-    private val viewModel = pogoStringViewModel()
 
-
+    private val db by lazy {
+        Room.databaseBuilder(
+            applicationContext,
+            PoGoStringsDatabase::class.java,
+            "pogostrings.db"
+        ).build()
+    }
+    private val viewModel by viewModels<pogoStringViewModel>(
+        factoryProducer = {
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return pogoStringViewModel(db.dao) as T
+                }
+            }
+        }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
-
         setContent{
             PoGoStringsTheme{
                 // A surface container using the 'background' color from the theme
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    PoGoStringsApp(viewModel = viewModel)
+                    val state by viewModel.state.collectAsState()
+                    PoGoStringsApp(state = state, onEvent = viewModel::onEvent)
                 }
             }
 
@@ -81,12 +90,15 @@ class MainActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
-    fun PoGoStringsApp(viewModel: pogoStringViewModel){
-        val newString = remember { mutableStateOf(TextFieldValue()) }
+    fun PoGoStringsApp(
+        state: PoGoStringsState,
+        onEvent: (PoGoStringsEvent) -> Unit
+    ){
+        //val newString = remember { mutableStateOf(TextFieldValue()) }
 
 
 
-        val pogoStringState = viewModel.pogoStringFlow.collectAsState();
+        //val pogoStringState = viewModel.pogoStringFlow.collectAsState();
         val lazyListState = rememberLazyListState()
 
 
@@ -99,21 +111,21 @@ class MainActivity : AppCompatActivity() {
                 state = lazyListState
             ){
                 items(
-                    items = pogoStringState.value,
+                    items = state.pogoStrings,
                     key = { item -> item.id },
                     itemContent = { item ->
                         val currentItem by rememberUpdatedState(item)
                         val dismissState = rememberDismissState(
                             confirmValueChange = {
                                 if (it == DismissValue.DismissedToStart) {
-                                    viewModel.removeString(currentItem)
+                                    PoGoStringsEvent.DeletePoGoString(currentItem)
                                     true
                                 } else false
                             }
                         )
 
                         if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                            viewModel.removeString(item)
+                            PoGoStringsEvent.DeletePoGoString(currentItem)
                         }
 
                         SwipeToDismiss(
@@ -150,7 +162,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                             },
                             dismissContent = {
-                                PoGoStringItemRow(item, pogoStringState, viewModel)
+                                PoGoStringItemRow(item, state, viewModel)
                             }
                         )
                     }
@@ -166,16 +178,19 @@ class MainActivity : AppCompatActivity() {
             ){
                 TextField(
 
-                    value = newString.value,
-                    onValueChange = {newString.value = it},
+                    value = state.pogoStringItem,
+                    onValueChange = {
+                        onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
+                    },
                     label = { Text("New String") }
                 )
                 Spacer(modifier = Modifier.widthIn(8.dp))
                 Button(
 
                     onClick = {
-                    viewModel.addString(newString.value.text)
-                    //save the list
+                    //viewModel.addString(newString.value.text)
+                    onEvent(PoGoStringsEvent.SavePoGoString)
+                        //save the list
 
                     println("Added new string")
 
@@ -191,7 +206,16 @@ class MainActivity : AppCompatActivity() {
     @Composable
     fun PoGoStringsAppPreview() {
         PoGoStringsTheme {
-            PoGoStringsApp(viewModel)
+            PoGoStringsApp(
+                state = PoGoStringsState(
+                    pogoStrings = listOf(
+                        PoGoString(1,"Test1"),
+                        PoGoString(2, "Test2"),
+                        PoGoString(3, "Test3")
+                    )
+                ),
+                onEvent = {}
+            )
         }
     }
 

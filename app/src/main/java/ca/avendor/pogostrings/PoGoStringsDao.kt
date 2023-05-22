@@ -11,6 +11,6 @@ interface PoGoStringsDao {
     @Delete
     suspend fun deletePoGoString(pogoString: PoGoString)
 
-    @Query("SELECT * FROM pogostrings")
+    @Query("SELECT * FROM pogostring")
     fun getPogoStrings(): Flow<List<PoGoString>>
 }
