@@ -118,14 +118,14 @@ class MainActivity : AppCompatActivity() {
                         val dismissState = rememberDismissState(
                             confirmValueChange = {
                                 if (it == DismissValue.DismissedToStart) {
-                                    PoGoStringsEvent.DeletePoGoString(currentItem)
+                                    onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
                                     true
                                 } else false
                             }
                         )
 
                         if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                            PoGoStringsEvent.DeletePoGoString(currentItem)
+                            onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
                         }
 
                         SwipeToDismiss(
@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity() {
                                 }
                             },
                             dismissContent = {
-                                PoGoStringItemRow(item, state, viewModel)
+                                PoGoStringItemRow(currentItem, state, viewModel)
                             }
                         )
                     }
