@@ -9,13 +9,72 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.datastore.core.DataStore
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.io.IOException
 
-class pogoStringViewModel(): ViewModel() {
+class pogoStringViewModel(
+
+    private val dao: PoGoStringsDao
+
+
+): ViewModel() {
+
+
+    private val _pogoStringFlow= dao.getPogoStrings()
+    private val _state = MutableStateFlow(PoGoStringsState())
+    val state = combine(_pogoStringFlow, _state) { pogoStrings, state ->
+        state.copy(
+            pogoStrings = pogoStrings,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        PoGoStringsState()
+    )
+    fun onEvent(event: PoGoStringsEvent) {
+        when (event) {
+            is PoGoStringsEvent.DeletePoGoString -> {
+                viewModelScope.launch{
+                    dao.deletePoGoString(event.pogoString)
+                }
+            }
+            PoGoStringsEvent.SavePoGoString -> {
+
+                val pogoStringItem = state.value.pogoStringItem
+
+                if (pogoStringItem.isBlank()){
+                    return
+                }
+                val pogoString = PoGoString(
+                    pogoStringItem = pogoStringItem
+                )
+
+                viewModelScope.launch {
+                    dao.upsertPoGoString(pogoString)
+                }
+                _state.update { it.copy(
+                    pogoStringItem = ""
+                )}
+
+            }
+
+            is PoGoStringsEvent.SetPoGoStringItem -> {
+                _state.update {it.copy(
+                    pogoStringItem = event.pogoStringItem
+                    )
+                }
+            }
+        }
+    }
 
 
 
@@ -28,7 +87,6 @@ class pogoStringViewModel(): ViewModel() {
 
 
     //private val _pogoStringFlow = MutableStateFlow<List<PoGoString>>(getStringList())
-    private val _pogoStringFlow = MutableStateFlow<List<PoGoString>>(stringList)
 
     val pogoStringFlow get() = _pogoStringFlow
 

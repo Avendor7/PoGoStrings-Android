@@ -32,7 +32,7 @@ fun PoGoStringItemRow(
                 horizontalArrangement = Arrangement.SpaceBetween,
 
             ) {
-                Text(item.textString)
+                Text(item.pogoStringItem)
                 Button(
                     onClick = {},
                     Modifier.widthIn(100.dp),
