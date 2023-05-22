@@ -45,10 +45,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import ca.avendor.pogostrings.ui.theme.PoGoStringsTheme
+import kotlinx.coroutines.launch
+
 class MainActivity : AppCompatActivity() {
 
     private val db by lazy {
@@ -72,8 +80,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
 
-        setContent{
-            PoGoStringsTheme{
+        setContent {
+            PoGoStringsTheme {
                 // A surface container using the 'background' color from the theme
 
                 Surface(
@@ -93,113 +101,137 @@ class MainActivity : AppCompatActivity() {
     fun PoGoStringsApp(
         state: PoGoStringsState,
         onEvent: (PoGoStringsEvent) -> Unit
-    ){
+    ) {
         //val newString = remember { mutableStateOf(TextFieldValue()) }
+        val snackbarHostState = remember { SnackbarHostState() }
 
-
+        val scaffoldState= rememberScaffoldState()
 
         //val pogoStringState = viewModel.pogoStringFlow.collectAsState();
         val lazyListState = rememberLazyListState()
 
-
-
-        Column(
-            Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ){
-            LazyColumn(
-                state = lazyListState
-            ){
-                items(
-                    items = state.pogoStrings,
-                    key = { item -> item.id },
-                    itemContent = { item ->
-                        val currentItem by rememberUpdatedState(item)
-                        val dismissState = rememberDismissState(
-                            confirmValueChange = {
-                                if (it == DismissValue.DismissedToStart) {
-                                    onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
-                                    true
-                                } else false
-                            }
-                        )
-
-                        if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                            onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
-                        }
-
-                        SwipeToDismiss(
-                            state = dismissState,
-                            directions = setOf(
-                                DismissDirection.EndToStart
-                            ),
-                            modifier = Modifier.padding(vertical = 1.dp),
-                            background = {
-                                val color by animateColorAsState(
-                                    when (dismissState.targetValue) {
-                                        DismissValue.Default -> Color.White
-                                        else -> Color.Red
-                                    }, label = "blah"
-                                )
-                                val scale by animateFloatAsState(
-                                    if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f,
-                                    label = ""
-                                )
-                                val alignment = Alignment.CenterEnd
-                                val icon = Icons.Default.Delete
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .background(color)
-                                        .padding(horizontal = Dp(20f)),
-                                    contentAlignment = alignment
-                                ) {
-                                    Icon(
-                                        icon,
-                                        contentDescription = "Delete Icon",
-                                        modifier = Modifier.scale(scale)
-                                    )
-                                }
-                            },
-                            dismissContent = {
-                                PoGoStringItemRow(currentItem, state, viewModel)
-                            }
+        Scaffold(
+            topBar = {},
+            floatingActionButton = {},
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    snackbar = { data ->
+                        Snackbar(
+                            snackbarData = data,
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
-
                 )
-            }
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+           },
+            content = { innerPadding ->
 
-            ){
-                TextField(
+                Column(
+                    Modifier.
+                    padding(innerPadding).
+                    fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    LazyColumn(
+                        contentPadding = innerPadding,
+                        state = lazyListState
+                    ) {
+                        items(
+                            items = state.pogoStrings,
+                            key = { item -> item.id },
+                            itemContent = { item ->
+                                val currentItem by rememberUpdatedState(item)
+                                val dismissState = rememberDismissState(
+                                    confirmValueChange = {
+                                        if (it == DismissValue.DismissedToStart) {
+                                            onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
+                                            true
+                                        } else false
+                                    }
+                                )
 
-                    value = state.pogoStringItem,
-                    onValueChange = {
-                        onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
-                    },
-                    label = { Text("New String") }
-                )
-                Spacer(modifier = Modifier.widthIn(8.dp))
-                Button(
+                                if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                                    onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
+                                }
 
-                    onClick = {
-                    //viewModel.addString(newString.value.text)
-                    onEvent(PoGoStringsEvent.SavePoGoString)
-                        //save the list
+                                SwipeToDismiss(
+                                    state = dismissState,
+                                    directions = setOf(
+                                        DismissDirection.EndToStart
+                                    ),
+                                    modifier = Modifier.padding(vertical = 1.dp),
+                                    background = {
+                                        val color by animateColorAsState(
+                                            when (dismissState.targetValue) {
+                                                DismissValue.Default -> Color.White
+                                                else -> Color.Red
+                                            }, label = "blah"
+                                        )
+                                        val scale by animateFloatAsState(
+                                            if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f,
+                                            label = ""
+                                        )
+                                        val alignment = Alignment.CenterEnd
+                                        val icon = Icons.Default.Delete
+                                        Box(
+                                            Modifier
+                                                .fillMaxSize()
+                                                .background(color)
+                                                .padding(horizontal = Dp(20f)),
+                                            contentAlignment = alignment
+                                        ) {
+                                            Icon(
+                                                icon,
+                                                contentDescription = "Delete Icon",
+                                                modifier = Modifier.scale(scale)
+                                            )
+                                        }
+                                    },
+                                    dismissContent = {
+                                        PoGoStringItemRow(
+                                            currentItem,
+                                            snackbarHostState
+                                        )
+                                    }
+                                )
+                            }
 
-                    println("Added new string")
+                        )
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
 
-                }) {
+                    ) {
+                        TextField(
 
-                    Text("Add New")
+                            value = state.pogoStringItem,
+                            onValueChange = {
+                                onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
+                            },
+                            label = { Text("New String") }
+                        )
+                        Spacer(modifier = Modifier.widthIn(8.dp))
+                        Button(
+
+                            onClick = {
+                                //viewModel.addString(newString.value.text)
+                                onEvent(PoGoStringsEvent.SavePoGoString)
+                                //save the list
+                                println("Added new string")
+
+                            }) {
+
+                            Text("Add New")
+                        }
+                    }
                 }
             }
-        }
+        )
+
+
     }
 
     @Preview(showBackground = true)
@@ -209,7 +241,7 @@ class MainActivity : AppCompatActivity() {
             PoGoStringsApp(
                 state = PoGoStringsState(
                     pogoStrings = listOf(
-                        PoGoString(1,"Test1"),
+                        PoGoString(1, "Test1"),
                         PoGoString(2, "Test2"),
                         PoGoString(3, "Test3")
                     )
