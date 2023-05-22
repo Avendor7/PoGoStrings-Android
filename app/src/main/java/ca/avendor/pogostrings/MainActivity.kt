@@ -51,6 +51,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
@@ -96,7 +98,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
+        ExperimentalComposeUiApi::class
+    )
     @Composable
     fun PoGoStringsApp(
         state: PoGoStringsState,
@@ -104,6 +108,7 @@ class MainActivity : AppCompatActivity() {
     ) {
         //val newString = remember { mutableStateOf(TextFieldValue()) }
         val snackbarHostState = remember { SnackbarHostState() }
+        val keyboardController = LocalSoftwareKeyboardController.current
 
         val scaffoldState= rememberScaffoldState()
 
@@ -205,6 +210,7 @@ class MainActivity : AppCompatActivity() {
                         verticalAlignment = Alignment.CenterVertically
 
                     ) {
+
                         TextField(
 
                             value = state.pogoStringItem,
@@ -219,6 +225,7 @@ class MainActivity : AppCompatActivity() {
                             onClick = {
                                 //viewModel.addString(newString.value.text)
                                 onEvent(PoGoStringsEvent.SavePoGoString)
+                                keyboardController?.hide()
                                 //save the list
                                 println("Added new string")
 
