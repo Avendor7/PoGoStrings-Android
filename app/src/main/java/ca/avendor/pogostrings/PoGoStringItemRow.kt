@@ -14,8 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 @Composable
@@ -47,7 +50,12 @@ fun PoGoStringItemRow(
                 horizontalArrangement = Arrangement.SpaceBetween,
 
             ) {
-                Text(item.pogoStringItem)
+                Text(
+                    text = item.pogoStringItem,
+                    fontSize = 20.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
+                )
                 Button(
                     onClick = {
                         copyTextToClipboard(item.pogoStringItem)

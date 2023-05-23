@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
@@ -168,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                                     background = {
                                         val color by animateColorAsState(
                                             when (dismissState.targetValue) {
-                                                DismissValue.Default -> Color.White
+                                                DismissValue.Default -> MaterialTheme.colorScheme.background
                                                 else -> Color.Red
                                             }, label = "blah"
                                         )
@@ -212,11 +213,13 @@ class MainActivity : AppCompatActivity() {
                     ) {
 
                         TextField(
-
+                            modifier = Modifier.weight(1f), // Set weight to 1
                             value = state.pogoStringItem,
                             onValueChange = {
                                 onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
                             },
+                            singleLine = true,
+
                             label = { Text("New String") }
                         )
                         Spacer(modifier = Modifier.widthIn(8.dp))
