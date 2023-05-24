@@ -114,21 +114,7 @@ class MainActivity : AppCompatActivity() {
         val lazyListState = rememberLazyListState()
 
         Scaffold(
-            topBar = {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .wrapContentHeight()
-//                        .background(MaterialTheme.colorScheme.primary)
-//                ) {
-//                    Text(
-//                        text = "PoGo Strings",
-//                        modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
-//                        style = MaterialTheme.typography.headlineSmall,
-//                        color = Color.White
-//                    )
-//                }
-            },
+            topBar = {},
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { openDialog.value = true },
@@ -154,7 +140,9 @@ class MainActivity : AppCompatActivity() {
             content = { innerPadding ->
 
                 Column(
-                    Modifier.padding(innerPadding).fillMaxHeight(),
+                    Modifier
+                        .padding(top = 4.dp)
+                        .fillMaxHeight(),
                     verticalArrangement = Arrangement.SpaceBetween,
                 ) {
                     LazyColumn(
