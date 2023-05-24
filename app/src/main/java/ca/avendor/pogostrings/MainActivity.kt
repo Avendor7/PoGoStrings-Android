@@ -41,6 +41,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +51,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
@@ -110,7 +113,6 @@ class MainActivity : AppCompatActivity() {
         val snackbarHostState = remember { SnackbarHostState() }
         val keyboardController = LocalSoftwareKeyboardController.current
         val openDialog = remember { mutableStateOf(false) }
-
         val lazyListState = rememberLazyListState()
 
         Scaffold(
@@ -263,13 +265,20 @@ class MainActivity : AppCompatActivity() {
                     tonalElevation = AlertDialogDefaults.TonalElevation
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
+                        val focusRequester = remember { FocusRequester() }
                         TextField(
+
                             value = state.pogoStringItem,
                             onValueChange = {
                                 onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
                             },
-                            label = { Text("New String") }
+                            label = { Text("New String") },
+                            modifier = Modifier.focusRequester(focusRequester)
+
                         )
+                        LaunchedEffect(Unit) {
+                            focusRequester.requestFocus()
+                        }
                         //Spacer(modifier = Modifier.height(24.dp))
                         TextButton(
                             onClick = {
