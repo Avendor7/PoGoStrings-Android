@@ -1,35 +1,60 @@
 package ca.avendor.pogostrings
 
-import android.content.Context
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDismissState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
@@ -84,12 +109,37 @@ class MainActivity : AppCompatActivity() {
     ) {
         val snackbarHostState = remember { SnackbarHostState() }
         val keyboardController = LocalSoftwareKeyboardController.current
+        val openDialog = remember { mutableStateOf(false) }
 
         val lazyListState = rememberLazyListState()
 
         Scaffold(
-            topBar = {},
-            floatingActionButton = {},
+            topBar = {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .wrapContentHeight()
+//                        .background(MaterialTheme.colorScheme.primary)
+//                ) {
+//                    Text(
+//                        text = "PoGo Strings",
+//                        modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+//                        style = MaterialTheme.typography.headlineSmall,
+//                        color = Color.White
+//                    )
+//                }
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { openDialog.value = true },
+                    ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = "Add PoGo String",
+                        tint = Color.White,
+                    )
+                }
+            },
             snackbarHost = {
                 SnackbarHost(
                     hostState = snackbarHostState,
@@ -100,13 +150,11 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                 )
-           },
+            },
             content = { innerPadding ->
 
                 Column(
-                    Modifier.
-                    padding(innerPadding).
-                    fillMaxHeight(),
+                    Modifier.padding(innerPadding).fillMaxHeight(),
                     verticalArrangement = Arrangement.SpaceBetween,
                 ) {
                     LazyColumn(
@@ -175,44 +223,84 @@ class MainActivity : AppCompatActivity() {
 
                         )
                     }
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+//                    Row(
+//                        Modifier
+//                            .fillMaxWidth()
+//                            .padding(8.dp),
+//                        verticalAlignment = Alignment.CenterVertically
+//
+//                    ) {
+//
+//                        TextField(
+//                            modifier = Modifier.weight(1f), // Set weight to 1
+//                            value = state.pogoStringItem,
+//                            onValueChange = {
+//                                onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
+//                            },
+//                            label = { Text("New String") }
+//                        )
+//                        Spacer(modifier = Modifier.widthIn(8.dp))
+//                        Button(
+//
+//                            onClick = {
+//                                //viewModel.addString(newString.value.text)
+//                                onEvent(PoGoStringsEvent.SavePoGoString)
+//                                keyboardController?.hide()
+//                                //save the list
+//                                println("Added new string")
+//
+//                            }) {
+//
+//                            Text("Add New")
+//                        }
+//                    }
+                }
+            }
+        )
 
-                    ) {
-
+        if (openDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    // Dismiss the dialog when the user clicks outside the dialog or on the back
+                    // button. If you want to disable that functionality, simply use an empty
+                    // onDismissRequest.
+                    openDialog.value = false
+                }
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .wrapContentHeight(),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    tonalElevation = AlertDialogDefaults.TonalElevation
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         TextField(
-                            modifier = Modifier.weight(1f), // Set weight to 1
                             value = state.pogoStringItem,
                             onValueChange = {
                                 onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
                             },
                             label = { Text("New String") }
                         )
-                        Spacer(modifier = Modifier.widthIn(8.dp))
-                        Button(
-
+                        //Spacer(modifier = Modifier.height(24.dp))
+                        TextButton(
                             onClick = {
-                                //viewModel.addString(newString.value.text)
                                 onEvent(PoGoStringsEvent.SavePoGoString)
                                 keyboardController?.hide()
                                 //save the list
                                 println("Added new string")
-
-                            }) {
-
-                            Text("Add New")
+                                openDialog.value = false
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text("Confirm")
                         }
                     }
                 }
             }
-        )
 
-
+        }
     }
-
     @Preview(showBackground = true)
     @Composable
     fun PoGoStringsAppPreview() {
