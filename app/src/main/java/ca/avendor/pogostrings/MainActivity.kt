@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
@@ -29,6 +30,7 @@ import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -39,6 +41,7 @@ import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +58,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -116,11 +120,30 @@ class MainActivity : AppCompatActivity() {
         val lazyListState = rememberLazyListState()
 
         Scaffold(
-            topBar = {},
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "PoGo Strings",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    navigationIcon = {},
+                    actions = {
+                        IconButton(onClick = { /* doSomething() */ }) {
+                            Icon(
+                                imageVector = Icons.Filled.Info,
+                                contentDescription = "Localized description"
+                            )
+                        }
+                    }
+                )
+            },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { openDialog.value = true },
-                    ) {
+                ) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
                         contentDescription = "Add PoGo String",
@@ -139,6 +162,24 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
             },
+//            bottomBar = {
+//                BottomAppBar(
+//                    actions = {
+//
+//                    },
+//                    floatingActionButton = {
+//                        FloatingActionButton(
+//                            onClick = { openDialog.value = true },
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Rounded.Add,
+//                                contentDescription = "Add PoGo String",
+//                                tint = Color.White,
+//                            )
+//                        }
+//                    }
+//                )
+//            },
             content = { innerPadding ->
 
                 Column(
