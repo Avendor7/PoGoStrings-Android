@@ -29,6 +29,7 @@ import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -131,23 +133,30 @@ class MainActivity : AppCompatActivity() {
                     },
                     navigationIcon = {},
                     actions = {
-                        IconButton(onClick = { /* doSomething() */ }) {
+                        IconButton(onClick = { openDialog.value = true }) {
                             Icon(
-                                imageVector = Icons.Filled.Info,
-                                contentDescription = "Localized description"
+                                imageVector = Icons.Rounded.Add,
+                                contentDescription = "Add PoGo String",
+                                tint = MaterialTheme.colorScheme.tertiary,
                             )
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        actionIconContentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
                 )
             },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { openDialog.value = true },
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
                         contentDescription = "Add PoGo String",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
                     )
                 }
             },
