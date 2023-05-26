@@ -10,21 +10,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
@@ -32,9 +27,7 @@ import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -111,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
+    @OptIn(ExperimentalMaterial3Api::class,
         ExperimentalComposeUiApi::class
     )
     @Composable
@@ -166,24 +159,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
             },
-//            bottomBar = {
-//                BottomAppBar(
-//                    actions = {
-//
-//                    },
-//                    floatingActionButton = {
-//                        FloatingActionButton(
-//                            onClick = { openDialog.value = true },
-//                        ) {
-//                            Icon(
-//                                imageVector = Icons.Rounded.Add,
-//                                contentDescription = "Add PoGo String",
-//                                tint = Color.White,
-//                            )
-//                        }
-//                    }
-//                )
-//            },
+            bottomBar = {},
             content = { innerPadding ->
 
                 Column(
@@ -258,37 +234,6 @@ class MainActivity : AppCompatActivity() {
 
                         )
                     }
-//                    Row(
-//                        Modifier
-//                            .fillMaxWidth()
-//                            .padding(8.dp),
-//                        verticalAlignment = Alignment.CenterVertically
-//
-//                    ) {
-//
-//                        TextField(
-//                            modifier = Modifier.weight(1f), // Set weight to 1
-//                            value = state.pogoStringItem,
-//                            onValueChange = {
-//                                onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
-//                            },
-//                            label = { Text("New String") }
-//                        )
-//                        Spacer(modifier = Modifier.widthIn(8.dp))
-//                        Button(
-//
-//                            onClick = {
-//                                //viewModel.addString(newString.value.text)
-//                                onEvent(PoGoStringsEvent.SavePoGoString)
-//                                keyboardController?.hide()
-//                                //save the list
-//                                println("Added new string")
-//
-//                            }) {
-//
-//                            Text("Add New")
-//                        }
-//                    }
                 }
             }
         )
