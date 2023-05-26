@@ -252,7 +252,6 @@ class MainActivity : AppCompatActivity() {
                 Surface(
                     modifier = Modifier
                         .wrapContentWidth(),
-
                     shape = MaterialTheme.shapes.extraLarge,
                     tonalElevation = AlertDialogDefaults.TonalElevation
                 ) {
@@ -285,6 +284,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+
             }
 
         }
