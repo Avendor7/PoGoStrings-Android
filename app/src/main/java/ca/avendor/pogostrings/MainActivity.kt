@@ -10,8 +10,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -132,18 +135,10 @@ class MainActivity : AppCompatActivity() {
                         )
                     },
                     navigationIcon = {},
-                    actions = {
-                        IconButton(onClick = { openDialog.value = true }) {
-                            Icon(
-                                imageVector = Icons.Rounded.Add,
-                                contentDescription = "Add PoGo String",
-                                tint = MaterialTheme.colorScheme.tertiary,
-                            )
-                        }
-                    },
+                    actions = {},
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        actionIconContentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        actionIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 )
             },
@@ -300,6 +295,8 @@ class MainActivity : AppCompatActivity() {
 
         if (openDialog.value) {
             AlertDialog(
+                modifier = Modifier.wrapContentHeight(unbounded = true),
+
                 onDismissRequest = {
                     // Dismiss the dialog when the user clicks outside the dialog or on the back
                     // button. If you want to disable that functionality, simply use an empty
@@ -309,16 +306,16 @@ class MainActivity : AppCompatActivity() {
             ) {
                 Surface(
                     modifier = Modifier
-                        .wrapContentWidth()
-                        .wrapContentHeight(),
+                        .wrapContentWidth(),
+
                     shape = MaterialTheme.shapes.extraLarge,
                     tonalElevation = AlertDialogDefaults.TonalElevation
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         val focusRequester = remember { FocusRequester() }
                         TextField(
-
                             value = state.pogoStringItem,
+                            maxLines = 3,
                             onValueChange = {
                                 onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
                             },
@@ -329,7 +326,6 @@ class MainActivity : AppCompatActivity() {
                         LaunchedEffect(Unit) {
                             focusRequester.requestFocus()
                         }
-                        //Spacer(modifier = Modifier.height(24.dp))
                         TextButton(
                             onClick = {
                                 onEvent(PoGoStringsEvent.SavePoGoString)
