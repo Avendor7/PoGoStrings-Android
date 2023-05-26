@@ -1,5 +1,6 @@
 package ca.avendor.pogostrings
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -61,9 +62,12 @@ fun PoGoStringItemRow(
                     onClick = {
                         copyTextToClipboard(item.pogoStringItem)
                         scope.launch {
-                            snackbarHostState.showSnackbar(
-                                "Copied To Clipboard"
-                            )
+                            //Only show on non Samsung devices since Samsung has their own copy to clipboard Toast notification
+                            if (android.os.Build.MANUFACTURER != "samsung") {
+                                snackbarHostState.showSnackbar(
+                                    "Copied To Clipboard"
+                                )
+                            }
                         }
                     },
                     Modifier.widthIn(100.dp),
