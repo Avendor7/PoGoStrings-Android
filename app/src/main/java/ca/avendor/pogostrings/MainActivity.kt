@@ -1,131 +1,364 @@
 package ca.avendor.pogostrings
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_main.*
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDismissState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.room.Room
+import ca.avendor.pogostrings.ui.theme.PoGoStringsTheme
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var pogoStringList: ArrayList<PoGoString>
-
-    private lateinit var poGoStringAdapter: PoGoStringAdapter
-
-    lateinit var rvStringItems: RecyclerView
+    private val db by lazy {
+        Room.databaseBuilder(
+            applicationContext,
+            PoGoStringsDatabase::class.java,
+            "pogostrings.db"
+        ).build()
+    }
+    private val viewModel by viewModels<pogoStringViewModel>(
+        factoryProducer = {
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return pogoStringViewModel(db.dao) as T
+                }
+            }
+        }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        //grab the item view
-        rvStringItems = findViewById(R.id.rvStringItems)
-        //load the data from the stored preferences
-        loadData()
-        //adapter things
-        poGoStringAdapter = PoGoStringAdapter(pogoStringList)
 
-        rvStringItems.adapter = poGoStringAdapter
-        rvStringItems.layoutManager = LinearLayoutManager(this)
+        setContent {
+            PoGoStringsTheme {
+                // A surface container using the 'background' color from the theme
 
-        //Add New button
-        btnNewString.setOnClickListener {
-
-            if (!etNewString.text.toString().isNullOrEmpty()){
-                addItemToList(etNewString.text.toString())
-
-                poGoStringAdapter.notifyDataSetChanged()
-                saveData()
-                Toast.makeText(this, "Saved new string. ", Toast.LENGTH_SHORT)
-                    .show()
-            }else{
-                Toast.makeText(this, "String empty. ", Toast.LENGTH_SHORT)
-                    .show()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val state by viewModel.state.collectAsState()
+                    PoGoStringsApp(state = state, onEvent = viewModel::onEvent)
+                }
             }
 
         }
-        // slide to delete helper
-        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                // this method is called
-                // when the item is moved.
-                return false
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
+        ExperimentalComposeUiApi::class
+    )
+    @Composable
+    fun PoGoStringsApp(
+        state: PoGoStringsState,
+        onEvent: (PoGoStringsEvent) -> Unit
+    ) {
+        val snackbarHostState = remember { SnackbarHostState() }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val openDialog = remember { mutableStateOf(false) }
+        val lazyListState = rememberLazyListState()
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "PoGo Strings",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    navigationIcon = {},
+                    actions = {},
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        actionIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { openDialog.value = true },
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = "Add PoGo String",
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                }
+            },
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    snackbar = { data ->
+                        Snackbar(
+                            snackbarData = data,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                )
+            },
+//            bottomBar = {
+//                BottomAppBar(
+//                    actions = {
+//
+//                    },
+//                    floatingActionButton = {
+//                        FloatingActionButton(
+//                            onClick = { openDialog.value = true },
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Rounded.Add,
+//                                contentDescription = "Add PoGo String",
+//                                tint = Color.White,
+//                            )
+//                        }
+//                    }
+//                )
+//            },
+            content = { innerPadding ->
+
+                Column(
+                    Modifier
+                        .padding(top = 4.dp)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    LazyColumn(
+                        contentPadding = innerPadding,
+                        state = lazyListState
+                    ) {
+                        items(
+                            items = state.pogoStrings,
+                            key = { item -> item.id },
+                            itemContent = { item ->
+                                val currentItem by rememberUpdatedState(item)
+                                val dismissState = rememberDismissState(
+                                    confirmValueChange = {
+                                        if (it == DismissValue.DismissedToStart) {
+                                            onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
+                                            true
+                                        } else false
+                                    }
+                                )
+
+                                if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                                    onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
+                                }
+
+                                SwipeToDismiss(
+                                    state = dismissState,
+                                    directions = setOf(
+                                        DismissDirection.EndToStart
+                                    ),
+                                    modifier = Modifier.padding(vertical = 1.dp),
+                                    background = {
+                                        val color by animateColorAsState(
+                                            when (dismissState.targetValue) {
+                                                DismissValue.Default -> MaterialTheme.colorScheme.background
+                                                else -> Color.Red
+                                            }, label = "blah"
+                                        )
+                                        val scale by animateFloatAsState(
+                                            if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f,
+                                            label = ""
+                                        )
+                                        val alignment = Alignment.CenterEnd
+                                        val icon = Icons.Default.Delete
+                                        Box(
+                                            Modifier
+                                                .fillMaxSize()
+                                                .background(color)
+                                                .padding(horizontal = Dp(20f)),
+                                            contentAlignment = alignment
+                                        ) {
+                                            Icon(
+                                                icon,
+                                                contentDescription = "Delete Icon",
+                                                modifier = Modifier.scale(scale)
+                                            )
+                                        }
+                                    },
+                                    dismissContent = {
+                                        PoGoStringItemRow(
+                                            currentItem,
+                                            snackbarHostState
+                                        )
+                                    }
+                                )
+                            }
+
+                        )
+                    }
+//                    Row(
+//                        Modifier
+//                            .fillMaxWidth()
+//                            .padding(8.dp),
+//                        verticalAlignment = Alignment.CenterVertically
+//
+//                    ) {
+//
+//                        TextField(
+//                            modifier = Modifier.weight(1f), // Set weight to 1
+//                            value = state.pogoStringItem,
+//                            onValueChange = {
+//                                onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
+//                            },
+//                            label = { Text("New String") }
+//                        )
+//                        Spacer(modifier = Modifier.widthIn(8.dp))
+//                        Button(
+//
+//                            onClick = {
+//                                //viewModel.addString(newString.value.text)
+//                                onEvent(PoGoStringsEvent.SavePoGoString)
+//                                keyboardController?.hide()
+//                                //save the list
+//                                println("Added new string")
+//
+//                            }) {
+//
+//                            Text("Add New")
+//                        }
+//                    }
+                }
+            }
+        )
+
+        if (openDialog.value) {
+            AlertDialog(
+                modifier = Modifier.wrapContentHeight(unbounded = true),
+
+                onDismissRequest = {
+                    // Dismiss the dialog when the user clicks outside the dialog or on the back
+                    // button. If you want to disable that functionality, simply use an empty
+                    // onDismissRequest.
+                    openDialog.value = false
+                }
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .wrapContentWidth(),
+
+                    shape = MaterialTheme.shapes.extraLarge,
+                    tonalElevation = AlertDialogDefaults.TonalElevation
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        val focusRequester = remember { FocusRequester() }
+                        TextField(
+                            value = state.pogoStringItem,
+                            maxLines = 3,
+                            onValueChange = {
+                                onEvent(PoGoStringsEvent.SetPoGoStringItem(it))
+                            },
+                            label = { Text("New String") },
+                            modifier = Modifier.focusRequester(focusRequester)
+
+                        )
+                        LaunchedEffect(Unit) {
+                            focusRequester.requestFocus()
+                        }
+                        TextButton(
+                            onClick = {
+                                onEvent(PoGoStringsEvent.SavePoGoString)
+                                keyboardController?.hide()
+                                //save the list
+                                println("Added new string")
+                                openDialog.value = false
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text("Confirm")
+                        }
+                    }
+                }
             }
 
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                // this method is called when we swipe our item to right direction.
-                // on below line we are getting the item at a particular position.
-                val deletedItem: PoGoString =
-                    pogoStringList.get(viewHolder.adapterPosition)
-
-                // below line is to get the position
-                // of the item at that position.
-                val position = viewHolder.adapterPosition
-
-                // this method is called when item is swiped.
-                // below line is to remove item from our array list.
-                pogoStringList.removeAt(viewHolder.adapterPosition)
-
-                // below line is to notify our item is removed from adapter.
-                poGoStringAdapter.notifyItemRemoved(viewHolder.adapterPosition)
-                saveData()
-                // below line is to display our snackbar with action.
-                Snackbar.make(rvStringItems, "Deleted " + deletedItem.item, Snackbar.LENGTH_LONG)
-                    .setAction(
-                        "Undo",
-                        View.OnClickListener {
-                            // adding on click listener to our action of snack bar.
-                            // below line is to add our item to array list with a position.
-                            pogoStringList.add(position, deletedItem)
-
-                            // below line is to notify item is
-                            // added to our adapter class.
-                            poGoStringAdapter.notifyItemInserted(position)
-                            saveData()
-                        }).show()
-            }
-            // at last we are adding this
-            // to our recycler view.
-        }).attachToRecyclerView(rvStringItems)
+        }
     }
-    private fun addItemToList(stringitem: String) {
-        // in this method we are adding item to list and
-        // notifying adapter that data has changed
-        etNewString.text.clear()
-        pogoStringList.add(PoGoString(stringitem))
-
-    }
-    //save to shared preferences. Converts to Json in order to save
-    private fun saveData() {
-        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val gson = Gson()
-        val json = gson.toJson(pogoStringList)
-        editor.putString("task list", json)
-        editor.apply()
-
+    @Preview(showBackground = true)
+    @Composable
+    fun PoGoStringsAppPreview() {
+        PoGoStringsTheme {
+            PoGoStringsApp(
+                state = PoGoStringsState(
+                    pogoStrings = listOf(
+                        PoGoString(1, "Test1"),
+                        PoGoString(2, "Test2"),
+                        PoGoString(3, "Test3")
+                    )
+                ),
+                onEvent = {}
+            )
+        }
     }
 
-    private fun loadData() {
-        val sharedPreferences = getSharedPreferences("shared preferences", MODE_PRIVATE)
-        val gson = Gson()
-        val json = sharedPreferences.getString("task list", "[]")
-        val type = object: TypeToken<ArrayList<PoGoString>>() {
-        }.type
-
-        if(json == null)
-            pogoStringList = ArrayList()
-        else
-            pogoStringList = gson.fromJson(json, type)
-    }
 }
