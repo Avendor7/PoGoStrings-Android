@@ -21,10 +21,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
-// Removed: import androidx.compose.material3.DismissDirection
-// Removed: import androidx.compose.material3.DismissValue
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -34,16 +32,14 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-// Removed: import androidx.compose.material3.SwipeToDismiss
-import androidx.compose.material3.SwipeToDismissBox // Added
-import androidx.compose.material3.SwipeToDismissBoxValue // Added
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-// Removed: import androidx.compose.material3.rememberDismissState
-import androidx.compose.material3.rememberSwipeToDismissBoxState // Added
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,7 +56,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp // Changed Dp(20f) to 20.dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
@@ -190,31 +186,31 @@ class MainActivity : AppCompatActivity() {
                                                 false // Don't confirm other state changes
                                             }
                                         }
-                                        // Optional: positionalThreshold can be added here if needed
+
                                     )
 
-                                // Use SwipeToDismissBox
+
                                 SwipeToDismissBox(
                                     state = swipeToDismissBoxState,
                                     modifier = Modifier.padding(vertical = 1.dp),
                                     // Set swipe directions using boolean flags
                                     enableDismissFromStartToEnd = false, // Disable right swipe
                                     enableDismissFromEndToStart = true, // Enable left swipe
-                                    // Use backgroundContent lambda
+
                                     backgroundContent = {
                                         val color by animateColorAsState(
-                                            // Check targetValue from swipeToDismissBoxState
+
                                             when (swipeToDismissBoxState.targetValue) {
                                                 SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.background
                                                 SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.background // Should not be reachable
                                                 SwipeToDismissBoxValue.EndToStart -> Color.Red
                                             },
-                                            label = "DismissBackgroundColor" // Added label
+                                            label = "DismissBackgroundColor"
                                         )
                                         val scale by animateFloatAsState(
-                                            // Check targetValue from swipeToDismissBoxState
+
                                             if (swipeToDismissBoxState.targetValue == SwipeToDismissBoxValue.Settled) 0.75f else 1f,
-                                            label = "DismissIconScale" // Added label
+                                            label = "DismissIconScale"
                                         )
                                         val alignment = Alignment.CenterEnd
                                         val icon = Icons.Default.Delete
@@ -222,7 +218,7 @@ class MainActivity : AppCompatActivity() {
                                             Modifier
                                                 .fillMaxSize()
                                                 .background(color)
-                                                .padding(horizontal = 20.dp), // Use dp directly
+                                                .padding(horizontal = 20.dp),
                                             contentAlignment = alignment
                                         ) {
                                             Icon(
@@ -232,7 +228,7 @@ class MainActivity : AppCompatActivity() {
                                             )
                                         }
                                     }
-                                    // Main content lambda for the item itself
+
                                 ) {
                                     PoGoStringItemRow(
                                         currentItem,
@@ -247,11 +243,11 @@ class MainActivity : AppCompatActivity() {
         )
 
         if (openDialog.value) {
-            AlertDialog(
-                modifier = Modifier.wrapContentHeight(unbounded = true),
+            BasicAlertDialog(
                 onDismissRequest = {
                     openDialog.value = false
-                }
+                },
+                modifier = Modifier.wrapContentHeight(unbounded = true)
             ) {
                 Surface(
                     modifier = Modifier.wrapContentWidth(),
