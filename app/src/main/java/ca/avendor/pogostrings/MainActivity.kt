@@ -23,8 +23,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
+// Removed: import androidx.compose.material3.DismissDirection
+// Removed: import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -34,13 +34,16 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismiss
+// Removed: import androidx.compose.material3.SwipeToDismiss
+import androidx.compose.material3.SwipeToDismissBox // Added
+import androidx.compose.material3.SwipeToDismissBoxValue // Added
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDismissState
+// Removed: import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.rememberSwipeToDismissBoxState // Added
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,9 +60,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.dp // Changed Dp(20f) to 20.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
@@ -78,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         factoryProducer = {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    @Suppress("UNCHECKED_CAST")
                     return pogoStringViewModel(db.dao) as T
                 }
             }
@@ -87,11 +89,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         setContent {
             PoGoStringsTheme {
                 // A surface container using the 'background' color from the theme
-
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -100,13 +100,10 @@ class MainActivity : AppCompatActivity() {
                     PoGoStringsApp(state = state, onEvent = viewModel::onEvent)
                 }
             }
-
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class,
-        ExperimentalComposeUiApi::class
-    )
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
     @Composable
     fun PoGoStringsApp(
         state: PoGoStringsState,
@@ -177,35 +174,47 @@ class MainActivity : AppCompatActivity() {
                             key = { item -> item.id },
                             itemContent = { item ->
                                 val currentItem by rememberUpdatedState(item)
-                                val dismissState = rememberDismissState(
-                                    confirmValueChange = {
-                                        if (it == DismissValue.DismissedToStart) {
-                                            onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
-                                            true
-                                        } else false
-                                    }
-                                )
+                                // Use rememberSwipeToDismissBoxState
+                                val swipeToDismissBoxState =
+                                    rememberSwipeToDismissBoxState(
+                                        confirmValueChange = { dismissValue ->
+                                            // Check if the swipe is towards the start (left swipe)
+                                            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                                onEvent(
+                                                    PoGoStringsEvent.DeletePoGoString(
+                                                        currentItem
+                                                    )
+                                                )
+                                                true // Confirm the state change (item will be dismissed)
+                                            } else {
+                                                false // Don't confirm other state changes
+                                            }
+                                        }
+                                        // Optional: positionalThreshold can be added here if needed
+                                    )
 
-                                if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                                    onEvent(PoGoStringsEvent.DeletePoGoString(currentItem))
-                                }
-
-                                SwipeToDismiss(
-                                    state = dismissState,
-                                    directions = setOf(
-                                        DismissDirection.EndToStart
-                                    ),
+                                // Use SwipeToDismissBox
+                                SwipeToDismissBox(
+                                    state = swipeToDismissBoxState,
                                     modifier = Modifier.padding(vertical = 1.dp),
-                                    background = {
+                                    // Set swipe directions using boolean flags
+                                    enableDismissFromStartToEnd = false, // Disable right swipe
+                                    enableDismissFromEndToStart = true, // Enable left swipe
+                                    // Use backgroundContent lambda
+                                    backgroundContent = {
                                         val color by animateColorAsState(
-                                            when (dismissState.targetValue) {
-                                                DismissValue.Default -> MaterialTheme.colorScheme.background
-                                                else -> Color.Red
-                                            }, label = "blah"
+                                            // Check targetValue from swipeToDismissBoxState
+                                            when (swipeToDismissBoxState.targetValue) {
+                                                SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.background
+                                                SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.background // Should not be reachable
+                                                SwipeToDismissBoxValue.EndToStart -> Color.Red
+                                            },
+                                            label = "DismissBackgroundColor" // Added label
                                         )
                                         val scale by animateFloatAsState(
-                                            if (dismissState.targetValue == DismissValue.Default) 0.75f else 1f,
-                                            label = ""
+                                            // Check targetValue from swipeToDismissBoxState
+                                            if (swipeToDismissBoxState.targetValue == SwipeToDismissBoxValue.Settled) 0.75f else 1f,
+                                            label = "DismissIconScale" // Added label
                                         )
                                         val alignment = Alignment.CenterEnd
                                         val icon = Icons.Default.Delete
@@ -213,7 +222,7 @@ class MainActivity : AppCompatActivity() {
                                             Modifier
                                                 .fillMaxSize()
                                                 .background(color)
-                                                .padding(horizontal = Dp(20f)),
+                                                .padding(horizontal = 20.dp), // Use dp directly
                                             contentAlignment = alignment
                                         ) {
                                             Icon(
@@ -222,16 +231,15 @@ class MainActivity : AppCompatActivity() {
                                                 modifier = Modifier.scale(scale)
                                             )
                                         }
-                                    },
-                                    dismissContent = {
-                                        PoGoStringItemRow(
-                                            currentItem,
-                                            snackbarHostState
-                                        )
                                     }
-                                )
+                                    // Main content lambda for the item itself
+                                ) {
+                                    PoGoStringItemRow(
+                                        currentItem,
+                                        snackbarHostState
+                                    )
+                                }
                             }
-
                         )
                     }
                 }
@@ -241,17 +249,12 @@ class MainActivity : AppCompatActivity() {
         if (openDialog.value) {
             AlertDialog(
                 modifier = Modifier.wrapContentHeight(unbounded = true),
-
                 onDismissRequest = {
-                    // Dismiss the dialog when the user clicks outside the dialog or on the back
-                    // button. If you want to disable that functionality, simply use an empty
-                    // onDismissRequest.
                     openDialog.value = false
                 }
             ) {
                 Surface(
-                    modifier = Modifier
-                        .wrapContentWidth(),
+                    modifier = Modifier.wrapContentWidth(),
                     shape = MaterialTheme.shapes.extraLarge,
                     tonalElevation = AlertDialogDefaults.TonalElevation
                 ) {
@@ -265,7 +268,6 @@ class MainActivity : AppCompatActivity() {
                             },
                             label = { Text("New String") },
                             modifier = Modifier.focusRequester(focusRequester)
-
                         )
                         LaunchedEffect(Unit) {
                             focusRequester.requestFocus()
@@ -274,7 +276,6 @@ class MainActivity : AppCompatActivity() {
                             onClick = {
                                 onEvent(PoGoStringsEvent.SavePoGoString)
                                 keyboardController?.hide()
-                                //save the list
                                 println("Added new string")
                                 openDialog.value = false
                             },
@@ -284,26 +285,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-
             }
-
         }
     }
-    @Preview(showBackground = true)
-    @Composable
-    fun PoGoStringsAppPreview() {
-        PoGoStringsTheme {
-            PoGoStringsApp(
-                state = PoGoStringsState(
-                    pogoStrings = listOf(
-                        PoGoString(1, "Test1"),
-                        PoGoString(2, "Test2"),
-                        PoGoString(3, "Test3")
-                    )
-                ),
-                onEvent = {}
-            )
-        }
-    }
-
 }
