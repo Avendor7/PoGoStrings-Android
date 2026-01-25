@@ -11,8 +11,8 @@ android {
         applicationId "ca.avendor.pogostrings"
         minSdk 33
         targetSdk 36
-        versionCode 7
-        versionName "1.4"
+        versionCode 8
+        versionName "1.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
