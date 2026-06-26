@@ -2,6 +2,7 @@ package ca.avendor.pogostrings
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.animateColorAsState
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        enableEdgeToEdge()
         setContent {
             PoGoStringsTheme {
                 // A surface container using the 'background' color from the theme
@@ -171,27 +172,19 @@ class MainActivity : AppCompatActivity() {
                             itemContent = { item ->
                                 val currentItem by rememberUpdatedState(item)
                                 // Use rememberSwipeToDismissBoxState
-                                val swipeToDismissBoxState =
-                                    rememberSwipeToDismissBoxState(
-                                        confirmValueChange = { dismissValue ->
-                                            // Check if the swipe is towards the start (left swipe)
-                                            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                                                onEvent(
-                                                    PoGoStringsEvent.DeletePoGoString(
-                                                        currentItem
-                                                    )
-                                                )
-                                                true // Confirm the state change (item will be dismissed)
-                                            } else {
-                                                false // Don't confirm other state changes
-                                            }
-                                        }
-
-                                    )
-
+                                val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
 
                                 SwipeToDismissBox(
                                     state = swipeToDismissBoxState,
+                                    onDismiss = { dismissValue ->
+                                        if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                                            onEvent(
+                                                PoGoStringsEvent.DeletePoGoString(
+                                                    currentItem
+                                                )
+                                            )
+                                        }
+                                    },
                                     modifier = Modifier.padding(vertical = 1.dp),
                                     // Set swipe directions using boolean flags
                                     enableDismissFromStartToEnd = false, // Disable right swipe
