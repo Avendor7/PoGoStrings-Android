@@ -10,6 +10,7 @@ android {
     defaultConfig {
         applicationId "ca.avendor.pogostrings"
         minSdk 33
+        //noinspection EditedTargetSdkVersion
         targetSdk 37
         versionCode 8
         versionName "1.5"
